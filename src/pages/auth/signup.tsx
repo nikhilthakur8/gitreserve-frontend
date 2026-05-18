@@ -1,49 +1,53 @@
-import { useState, type FormEvent } from "react"
+import { useState, useEffect, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useAuth } from "@/hooks/use-auth"
+import { useAppDispatch, useAppSelector } from "@/store"
+import { authActions } from "@/store/slices/auth.slice"
 
 export function SignupPage() {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [submitting, setSubmitting] = useState(false)
-  const { signup } = useAuth()
+  const [submitted, setSubmitted] = useState(false)
+  const dispatch = useAppDispatch()
+  const { isAuthenticated, error, loading } = useAppSelector((s) => s.auth)
   const navigate = useNavigate()
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setSubmitting(true)
-    try {
-      await signup(email, password, name)
+  useEffect(() => {
+    if (submitted && isAuthenticated) {
+      toast.success("Account created successfully!")
       navigate("/dashboard")
-    } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
-      setError(msg || "Signup failed")
-    } finally {
-      setSubmitting(false)
     }
+  }, [submitted, isAuthenticated, navigate])
+
+  useEffect(() => {
+    if (submitted && error) {
+      toast.error(error)
+      setSubmitted(false)
+    }
+  }, [submitted, error])
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    setSubmitted(true)
+    dispatch(authActions.signupRequest({ email, password, name }))
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center bg-black px-4">
+      <Card className="w-full max-w-sm border-neutral-800 bg-neutral-950">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Create an account</CardTitle>
-          <CardDescription>Get started with GitReserve</CardDescription>
+          <CardTitle className="text-2xl text-white">Create an account</CardTitle>
+          <CardDescription className="text-neutral-400">Get started with GitReserve</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
-            {error && (
-              <p className="text-sm text-destructive text-center">{error}</p>
-            )}
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name" className="text-neutral-300">Name</Label>
               <Input
                 id="name"
                 type="text"
@@ -51,10 +55,11 @@ export function SignupPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                className="border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 focus-visible:ring-neutral-600"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-neutral-300">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -62,10 +67,11 @@ export function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 focus-visible:ring-neutral-600"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-neutral-300">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -74,15 +80,16 @@ export function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
+                className="border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 focus-visible:ring-neutral-600"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Creating account..." : "Sign up"}
+            <Button type="submit" className="w-full bg-white text-black hover:bg-neutral-200" disabled={submitted && loading}>
+              {submitted && loading ? "Creating account..." : "Sign up"}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <p className="mt-4 text-center text-sm text-neutral-500">
             Already have an account?{" "}
-            <Link to="/login" className="text-primary underline-offset-4 hover:underline">
+            <Link to="/login" className="text-white underline-offset-4 hover:underline">
               Sign in
             </Link>
           </p>

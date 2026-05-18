@@ -1,50 +1,26 @@
-import { useState, useEffect, useCallback } from "react"
-import { authService, type User } from "@/services/auth.service"
+import { useEffect } from "react"
+import { useAppDispatch, useAppSelector } from "@/store"
+import { authActions } from "@/store/slices/auth.slice"
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  const fetchUser = useCallback(async () => {
-    const token = localStorage.getItem("token")
-    if (!token) {
-      setLoading(false)
-      return
-    }
-    try {
-      const userData = await authService.me()
-      setUser(userData)
-      setIsAuthenticated(true)
-    } catch {
-      localStorage.removeItem("token")
-      setIsAuthenticated(false)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const dispatch = useAppDispatch()
+  const { user, loading, isAuthenticated, error } = useAppSelector((s) => s.auth)
 
   useEffect(() => {
-    void fetchUser()
-  }, [fetchUser])
+    dispatch(authActions.fetchMeRequest())
+  }, [dispatch])
 
-  const login = async (email: string, password: string) => {
-    const res = await authService.login({ email, password })
-    localStorage.setItem("token", res.accessToken)
-    await fetchUser()
+  const login = (email: string, password: string) => {
+    dispatch(authActions.loginRequest({ email, password }))
   }
 
-  const signup = async (email: string, password: string, name: string) => {
-    const res = await authService.signup({ email, password, name })
-    localStorage.setItem("token", res.accessToken)
-    await fetchUser()
+  const signup = (email: string, password: string, name: string) => {
+    dispatch(authActions.signupRequest({ email, password, name }))
   }
 
   const logout = () => {
-    localStorage.removeItem("token")
-    setUser(null)
-    setIsAuthenticated(false)
+    dispatch(authActions.logout())
   }
 
-  return { user, loading, isAuthenticated, login, signup, logout }
+  return { user, loading, isAuthenticated, error, login, signup, logout }
 }

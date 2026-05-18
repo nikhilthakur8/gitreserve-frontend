@@ -1,17 +1,25 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { Provider } from "react-redux"
+import { Toaster } from "@/components/ui/sonner"
+import { store } from "@/store"
+import { LandingPage } from "@/pages/landing"
 import { LoginPage } from "@/pages/auth/login"
 import { SignupPage } from "@/pages/auth/signup"
 import { DashboardPage } from "@/pages/dashboard"
+import { IntegrationsPage } from "@/pages/integrations"
+import { ActivityPage } from "@/pages/activity"
+import { SettingsPage } from "@/pages/settings"
+import { AddRepoPage } from "@/pages/repos/add-repo"
+import { RepoDetailPage } from "@/pages/repos/repo-detail"
+import { OAuthCallbackPage } from "@/pages/integrations/oauth-callback"
 import { ProtectedRoute } from "@/layouts/protected-route"
-
-const queryClient = new QueryClient()
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <Provider store={store}>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route
@@ -22,9 +30,65 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route
+            path="/integrations"
+            element={
+              <ProtectedRoute>
+                <IntegrationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/activity"
+            element={
+              <ProtectedRoute>
+                <ActivityPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/repos/add"
+            element={
+              <ProtectedRoute>
+                <AddRepoPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/repos/:repoId"
+            element={
+              <ProtectedRoute>
+                <RepoDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/auth/github/callback"
+            element={
+              <ProtectedRoute>
+                <OAuthCallbackPage type="github" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/auth/gitlab/callback"
+            element={
+              <ProtectedRoute>
+                <OAuthCallbackPage type="gitlab" />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
-    </QueryClientProvider>
+      <Toaster />
+    </Provider>
   )
 }
