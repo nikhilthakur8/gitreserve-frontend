@@ -25,7 +25,9 @@ import {
   Package,
   Upload,
   Copy,
+  Download,
 } from "lucide-react"
+import { toast } from "sonner"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -35,6 +37,7 @@ import { timeAgo } from "@/lib/time"
 import { useAppDispatch, useAppSelector } from "@/store"
 import { reposActions } from "@/store/slices/repos.slice"
 import { activityActions } from "@/store/slices/activity.slice"
+import { api } from "@/services/api"
 import type { SyncJob, SyncJobStatus, SyncMode, TrackedRepoStatus } from "@/types/api"
 
 export function RepoDetailPage() {
@@ -46,6 +49,7 @@ export function RepoDetailPage() {
   const syncing = useAppSelector((s) => s.repos.syncing[repoId!])
   const { jobs, loading: jobsLoading } = useAppSelector((s) => s.activity)
   const [editingMode, setEditingMode] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     if (!repo) dispatch(reposActions.fetchReposRequest())
@@ -67,6 +71,37 @@ export function RepoDetailPage() {
   }
 
   const handleSync = () => dispatch(reposActions.syncRepoRequest(repo.id))
+
+  const handleDownload = async () => {
+    setDownloading(true)
+    try {
+      const response = await api.get(`/repositories/${repo.id}/download`, {
+        responseType: "blob",
+      })
+      const url = window.URL.createObjectURL(response.data as Blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${repo.source.name}.bundle`
+      a.click()
+      window.URL.revokeObjectURL(url)
+      toast.success("Download started")
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: Blob } })?.response?.data
+      if (msg instanceof Blob) {
+        const text = await msg.text()
+        try {
+          const json = JSON.parse(text) as { error?: string }
+          toast.error(json.error || "Download failed")
+        } catch {
+          toast.error("Download failed")
+        }
+      } else {
+        toast.error("Download failed")
+      }
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   const handleTogglePause = () => {
     const newStatus: TrackedRepoStatus = repo.status === "paused" ? "active" : "paused"
@@ -166,6 +201,16 @@ export function RepoDetailPage() {
               onClick={() => setEditingMode(!editingMode)}
             >
               {editingMode ? "Cancel" : "Change sync mode"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-white gap-2"
+              onClick={() => void handleDownload()}
+              disabled={downloading || !repo.lastSyncedAt}
+            >
+              <Download className={`h-3.5 w-3.5 ${downloading ? "animate-bounce" : ""}`} />
+              {downloading ? "Downloading..." : "Download bundle"}
             </Button>
           </div>
 

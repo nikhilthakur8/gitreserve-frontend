@@ -30,31 +30,81 @@ export function Sidebar() {
   }
 
   return (
-    <>
-      {/* Collapsed strip — always visible when sidebar is closed */}
-      {!pinned && (
-        <div className="sticky top-0 flex h-screen w-12 flex-col items-center border-r border-neutral-800 bg-neutral-950 py-4 shrink-0">
-          <Link to="/" className="mb-6">
-            <Logo className="h-5 w-5" />
-          </Link>
-          {NAV_ITEMS.map((item) => {
-            const active = location.pathname === item.path
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                title={item.label}
-                className={`mb-1 flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
-                  active
-                    ? "bg-neutral-800 text-white"
-                    : "text-neutral-500 hover:bg-neutral-800/50 hover:text-white"
-                }`}
-              >
-                <item.icon className="h-4 w-4" />
-              </Link>
-            )
-          })}
-          <div className="mt-auto flex flex-col items-center gap-2">
+    <aside
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={`sticky top-0 flex h-screen flex-col border-r border-neutral-800 bg-neutral-950 shrink-0 transition-all duration-200 ease-in-out overflow-hidden ${
+        expanded ? "w-60" : "w-12"
+      }`}
+    >
+      {/* Header */}
+      <div className={`flex h-14 items-center shrink-0 border-b border-neutral-800 ${expanded ? "justify-between px-4" : "justify-center"}`}>
+        <Link to="/" className="flex items-center gap-2 min-w-0">
+          <Logo className={`shrink-0 transition-all duration-200 ${expanded ? "h-6 w-6" : "h-5 w-5"}`} />
+          {expanded && (
+            <span className="text-sm font-semibold tracking-tight text-white whitespace-nowrap animate-in fade-in duration-150">
+              GitReserve
+            </span>
+          )}
+        </Link>
+        {expanded && (
+          <button
+            onClick={() => { setPinned(!pinned); if (pinned) setHovered(false) }}
+            title={pinned ? "Unpin sidebar" : "Pin sidebar"}
+            className="flex h-7 w-7 items-center justify-center rounded text-neutral-500 hover:text-white transition-colors shrink-0"
+          >
+            <PanelLeft className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      {/* Nav */}
+      <nav className={`flex-1 py-4 space-y-1 ${expanded ? "px-2" : "px-1.5"}`}>
+        {NAV_ITEMS.map((item) => {
+          const active = location.pathname === item.path
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              title={expanded ? undefined : item.label}
+              className={`flex items-center gap-3 rounded-lg transition-colors ${
+                expanded ? "px-3 py-2.5 text-sm" : "justify-center h-9 w-9"
+              } ${
+                active
+                  ? "bg-neutral-800 text-white font-medium"
+                  : "text-neutral-500 hover:bg-neutral-800/50 hover:text-white"
+              }`}
+            >
+              <item.icon className="h-4 w-4 shrink-0" />
+              {expanded && (
+                <span className="whitespace-nowrap animate-in fade-in duration-150">{item.label}</span>
+              )}
+            </Link>
+          )
+        })}
+      </nav>
+
+      {/* Footer */}
+      <div className={`border-t border-neutral-800 ${expanded ? "p-3" : "py-3 flex flex-col items-center gap-2"}`}>
+        {expanded ? (
+          <div className="flex items-center gap-3 animate-in fade-in duration-150">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-700 text-xs font-medium text-white">
+              {user?.name?.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">{user?.name}</p>
+              <p className="text-xs text-neutral-500 truncate">{user?.email}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              title="Log out"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-neutral-500 hover:text-white transition-colors"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <>
             <button
               onClick={() => setPinned(true)}
               title="Expand sidebar"
@@ -65,71 +115,9 @@ export function Sidebar() {
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-700 text-[10px] font-medium text-white">
               {user?.name?.charAt(0).toUpperCase()}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Expanded sidebar — only when pinned */}
-      {pinned && (
-        <aside
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          className="sticky top-0 flex h-screen w-60 flex-col border-r border-neutral-800 bg-neutral-950 shrink-0"
-        >
-          <div className="flex h-14 items-center justify-between px-4 border-b border-neutral-800">
-            <Link to="/" className="flex items-center gap-2">
-              <Logo className="h-6 w-6 shrink-0" />
-              <span className="text-sm font-semibold tracking-tight text-white">GitReserve</span>
-            </Link>
-            <button
-              onClick={() => setPinned(false)}
-              title="Collapse sidebar"
-              className="flex h-7 w-7 items-center justify-center rounded text-neutral-500 hover:text-white transition-colors"
-            >
-              <PanelLeft className="h-4 w-4" />
-            </button>
-          </div>
-
-          <nav className="flex-1 px-2 py-4 space-y-1">
-            {NAV_ITEMS.map((item) => {
-              const active = location.pathname === item.path
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
-                    active
-                      ? "bg-neutral-800 text-white font-medium"
-                      : "text-neutral-400 hover:bg-neutral-800/50 hover:text-white"
-                  }`}
-                >
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  <span>{item.label}</span>
-                </Link>
-              )
-            })}
-          </nav>
-
-          <div className="border-t border-neutral-800 p-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-700 text-xs font-medium text-white">
-                {user?.name?.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-                <p className="text-xs text-neutral-500 truncate">{user?.email}</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                title="Log out"
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-neutral-500 hover:text-white transition-colors"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
-        </aside>
-      )}
-    </>
+          </>
+        )}
+      </div>
+    </aside>
   )
 }
