@@ -51,7 +51,7 @@ function* signupSaga(action: PayloadAction<{ email: string; password: string; na
 }
 
 function* logoutSaga() {
-  localStorage.removeItem("token")
+  yield call(() => localStorage.removeItem("token"))
 }
 
 function extractError(err: unknown): string {

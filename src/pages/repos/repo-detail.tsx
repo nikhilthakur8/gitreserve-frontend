@@ -18,7 +18,6 @@ import {
   CheckCircle2,
   AlertCircle,
   GitCommitHorizontal,
-  Timer,
   Zap,
   Calendar,
   Hand,

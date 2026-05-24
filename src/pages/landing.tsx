@@ -3,7 +3,7 @@ import { useCallback, useState } from "react"
 import { Shield, Zap, Server, ArrowRight, GitBranch } from "lucide-react"
 import { api } from "@/services/api"
 import { Logo } from "@/components/icons/logo"
-import { GithubIcon, GitlabIcon } from "@/components/icons/provider-icon"
+import { GithubIcon } from "@/components/icons/provider-icon"
 
 function NavButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
   return (

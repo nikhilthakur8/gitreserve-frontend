@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Loader2, Search, Lock, Globe, Webhook, Clock, X, Server, Check } from "lucide-react"
 import { Sidebar } from "@/components/layout/sidebar"
@@ -17,9 +17,7 @@ export function AddRepoPage() {
   const { items: available, loading } = useAppSelector((s) => s.availableRepos)
   const integrations = useAppSelector((s) => s.integrations.items)
   const [search, setSearch] = useState("")
-  const [selectedProvider, setSelectedProvider] = useState<ProviderType | null>(null)
   const [pendingRepo, setPendingRepo] = useState<AvailableRepo | null>(null)
-  const [selectedStorage, setSelectedStorage] = useState<string | null>(null)
 
   useEffect(() => {
     dispatch(integrationsActions.fetchIntegrationsRequest())
@@ -32,19 +30,22 @@ export function AddRepoPage() {
     (i) => (i.type === "s3" || i.type === "r2") && i.status === "active",
   )
 
-  useEffect(() => {
-    if (storageIntegrations.length === 1 && !selectedStorage) {
-      setSelectedStorage(storageIntegrations[0]!.id)
-    }
-  }, [storageIntegrations.length])
+  const defaultStorage = storageIntegrations.length === 1 ? storageIntegrations[0]!.id : null
+  const defaultProvider = gitIntegrations.length > 0 ? (gitIntegrations[0]!.type as ProviderType) : null
 
+  const [selectedProvider, setSelectedProvider] = useState<ProviderType | null>(null)
+  const [selectedStorage, setSelectedStorage] = useState<string | null>(null)
+
+  const activeProvider = selectedProvider ?? defaultProvider
+  const activeStorage = selectedStorage ?? defaultStorage
+
+  const providerInitialized = useRef(false)
   useEffect(() => {
-    if (gitIntegrations.length > 0 && !selectedProvider) {
-      const first = gitIntegrations[0]!.type as ProviderType
-      setSelectedProvider(first)
-      dispatch(availableReposActions.fetchAvailableRequest(first))
+    if (defaultProvider && !providerInitialized.current) {
+      providerInitialized.current = true
+      dispatch(availableReposActions.fetchAvailableRequest(defaultProvider))
     }
-  }, [gitIntegrations.length])
+  }, [defaultProvider, dispatch])
 
   const handleProviderChange = (type: ProviderType) => {
     setSelectedProvider(type)
@@ -52,10 +53,10 @@ export function AddRepoPage() {
   }
 
   const handleTrack = (syncMode: SyncMode) => {
-    if (!pendingRepo || !selectedStorage) return
+    if (!pendingRepo || !activeStorage) return
 
     const gitIntegration = integrations.find(
-      (i) => i.type === selectedProvider && i.status === "active",
+      (i) => i.type === activeProvider && i.status === "active",
     )
 
     if (!gitIntegration) return
@@ -63,7 +64,7 @@ export function AddRepoPage() {
     dispatch(
       reposActions.trackRepoRequest({
         integrationId: gitIntegration.id,
-        storageIntegrationId: selectedStorage,
+        storageIntegrationId: activeStorage,
         externalRepoId: pendingRepo.id,
         syncMode,
       }),
@@ -116,7 +117,7 @@ export function AddRepoPage() {
                       <StorageOption
                         key={s.id}
                         integration={s}
-                        selected={selectedStorage === s.id}
+                        selected={activeStorage === s.id}
                         onSelect={() => setSelectedStorage(s.id)}
                       />
                     ))}
@@ -130,7 +131,7 @@ export function AddRepoPage() {
                     key={i.id}
                     onClick={() => handleProviderChange(i.type as ProviderType)}
                     className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
-                      selectedProvider === i.type
+                      activeProvider === i.type
                         ? "border-neutral-600 bg-neutral-800 text-white"
                         : "border-neutral-800 text-neutral-400 hover:border-neutral-700 hover:text-white"
                     }`}
@@ -162,7 +163,7 @@ export function AddRepoPage() {
                       key={repo.id}
                       repo={repo}
                       isPending={pendingRepo?.id === repo.id}
-                      storageSelected={!!selectedStorage}
+                      storageSelected={!!activeStorage}
                       onSelect={() => setPendingRepo(repo)}
                       onCancel={() => setPendingRepo(null)}
                       onTrack={handleTrack}

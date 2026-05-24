@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from "react"
+import { useEffect, useRef, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -9,32 +9,33 @@ import { useAppDispatch, useAppSelector } from "@/store"
 import { authActions } from "@/store/slices/auth.slice"
 
 export function SignupPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [submitted, setSubmitted] = useState(false)
   const dispatch = useAppDispatch()
   const { isAuthenticated, error, loading } = useAppSelector((s) => s.auth)
   const navigate = useNavigate()
+  const lastError = useRef(error)
 
   useEffect(() => {
-    if (submitted && isAuthenticated) {
+    if (isAuthenticated) {
       toast.success("Account created successfully!")
       navigate("/dashboard")
     }
-  }, [submitted, isAuthenticated, navigate])
+  }, [isAuthenticated, navigate])
 
   useEffect(() => {
-    if (submitted && error) {
+    if (error && error !== lastError.current) {
       toast.error(error)
-      setSubmitted(false)
     }
-  }, [submitted, error])
+    lastError.current = error
+  }, [error])
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
-    dispatch(authActions.signupRequest({ email, password, name }))
+    const formData = new FormData(e.currentTarget)
+    dispatch(authActions.signupRequest({
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+    }))
   }
 
   return (
@@ -50,10 +51,9 @@ export function SignupPage() {
               <Label htmlFor="name" className="text-neutral-300">Name</Label>
               <Input
                 id="name"
+                name="name"
                 type="text"
                 placeholder="Your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
                 required
                 className="border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 focus-visible:ring-neutral-600"
               />
@@ -62,10 +62,9 @@ export function SignupPage() {
               <Label htmlFor="email" className="text-neutral-300">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 focus-visible:ring-neutral-600"
               />
@@ -74,17 +73,16 @@ export function SignupPage() {
               <Label htmlFor="password" className="text-neutral-300">Password</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
                 className="border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 focus-visible:ring-neutral-600"
               />
             </div>
-            <Button type="submit" className="w-full bg-white text-black hover:bg-neutral-200" disabled={submitted && loading}>
-              {submitted && loading ? "Creating account..." : "Sign up"}
+            <Button type="submit" className="w-full bg-white text-black hover:bg-neutral-200" disabled={loading}>
+              {loading ? "Creating account..." : "Sign up"}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-neutral-500">

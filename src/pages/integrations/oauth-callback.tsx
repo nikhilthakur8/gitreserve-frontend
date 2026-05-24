@@ -46,7 +46,7 @@ export function OAuthCallbackPage({ type }: { type: IntegrationType }) {
         toast.error("Failed to connect")
         navigate("/integrations")
       })
-  }, [])
+  }, [dispatch, navigate, params, type])
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black">
