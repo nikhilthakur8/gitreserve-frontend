@@ -28,7 +28,7 @@ export function SignupPage() {
     lastError.current = error
   }, [error])
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     dispatch(authActions.signupRequest({
