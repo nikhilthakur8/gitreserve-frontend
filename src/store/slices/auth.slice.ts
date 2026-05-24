@@ -25,8 +25,14 @@ export const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    loginRequest(_, _action: PayloadAction<{ email: string; password: string }>) {},
-    signupRequest(_, _action: PayloadAction<{ email: string; password: string; name: string }>) {},
+    loginRequest(state, _action: PayloadAction<{ email: string; password: string }>) {
+      state.loading = true
+      state.error = null
+    },
+    signupRequest(state, _action: PayloadAction<{ email: string; password: string; name: string }>) {
+      state.loading = true
+      state.error = null
+    },
     fetchMeRequest() {},
     authSuccess(state, action: PayloadAction<AuthUser>) {
       state.user = action.payload
