@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom"
 import { useCallback, useState } from "react"
 import { Shield, Zap, Server, ArrowRight, GitBranch } from "lucide-react"
 import { api } from "@/services/api"
-import { Logo } from "@/components/icons/logo"
 import { GithubIcon } from "@/components/icons/provider-icon"
 
 function NavButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
@@ -55,15 +54,14 @@ export function LandingPage() {
 
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-6 py-5 md:px-12 lg:px-20">
-        <div className="flex items-center gap-2.5">
-          <Logo className="h-10 w-10" />
+        <div className="flex items-center">
           <span className="text-xl font-semibold tracking-tight">GitReserve</span>
         </div>
         <NavButton onClick={() => void handleLogin()} loading={checking} />
       </nav>
 
       {/* Hero */}
-      <section className="relative px-6 pt-24 pb-32 md:px-12 md:pt-36 md:pb-44 lg:px-20">
+      <section className="relative px-6 pt-12 pb-24 md:px-12 md:pt-16 md:pb-32 lg:px-20">
         {/* Grid accent lines */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-0 left-1/4 h-full w-px bg-gradient-to-b from-transparent via-neutral-800/50 to-transparent" />
@@ -72,8 +70,11 @@ export function LandingPage() {
         </div>
 
         <div className="relative max-w-4xl">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-900/80 px-4 py-1.5 text-xs font-medium text-neutral-400 backdrop-blur-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="group mb-6 inline-flex items-center gap-2.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-5 py-2 text-xs font-medium text-emerald-400 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/40 hover:bg-emerald-500/10">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
             Automated backups on every push
           </div>
 
@@ -208,8 +209,7 @@ export function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-neutral-800 px-6 py-8 md:px-12 lg:px-20">
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center gap-2">
-            <Logo className="h-7 w-7" />
+          <div className="flex items-center">
             <span className="text-sm font-medium">GitReserve</span>
           </div>
           <p className="text-xs text-neutral-600">

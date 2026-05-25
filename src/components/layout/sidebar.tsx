@@ -4,7 +4,6 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { useAppDispatch, useAppSelector } from "@/store"
 import { authActions } from "@/store/slices/auth.slice"
-import { Logo } from "@/components/icons/logo"
 
 const NAV_ITEMS = [
   { label: "Repositories", icon: BookMarked, path: "/dashboard" },
@@ -39,12 +38,13 @@ export function Sidebar() {
     >
       {/* Header */}
       <div className={`flex h-14 items-center shrink-0 border-b border-neutral-800 ${expanded ? "justify-between px-4" : "justify-center"}`}>
-        <Link to="/" className="flex items-center gap-2 min-w-0">
-          <Logo className={`shrink-0 transition-all duration-200 ${expanded ? "h-6 w-6" : "h-5 w-5"}`} />
-          {expanded && (
-            <span className="text-sm font-semibold tracking-tight text-white whitespace-nowrap animate-in fade-in duration-150">
+        <Link to="/" className="flex items-center min-w-0">
+          {expanded ? (
+            <span className="text-lg font-bold tracking-tight text-white whitespace-nowrap animate-in fade-in duration-150">
               GitReserve
             </span>
+          ) : (
+            <span className="text-xs font-bold text-white">GR</span>
           )}
         </Link>
         {expanded && (
