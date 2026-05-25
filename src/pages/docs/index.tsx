@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react"
-import { Link, useParams, Navigate, useNavigate } from "react-router-dom"
+import { Link, useParams, Navigate } from "react-router-dom"
 import { ChevronRight, Menu, X, Search, Sparkles, ExternalLink, AlertTriangle, Lightbulb, Copy, Check, ChevronDown, FileText } from "lucide-react"
 import { DOCS, DOC_CATEGORIES, type DocSection } from "./docs-content"
 
@@ -440,7 +440,6 @@ function OnThisPage({ doc }: { doc: DocSection }) {
 
 export function DocsPage() {
   const { slug } = useParams()
-  const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   if (!slug) {
