@@ -6,6 +6,7 @@ interface ReposState {
   loading: boolean
   error: string | null
   syncing: Record<string, boolean>
+  deleting: Record<string, boolean>
 }
 
 const initialState: ReposState = {
@@ -13,6 +14,7 @@ const initialState: ReposState = {
   loading: false,
   error: null,
   syncing: {},
+  deleting: {},
 }
 
 export const reposSlice = createSlice({
@@ -35,9 +37,15 @@ export const reposSlice = createSlice({
     trackRepoSuccess(state, action: PayloadAction<TrackedRepo>) {
       state.items.push(action.payload)
     },
-    untrackRepoRequest(_, _action: PayloadAction<string>) {},
+    untrackRepoRequest(state, action: PayloadAction<string>) {
+      state.deleting[action.payload] = true
+    },
     untrackRepoSuccess(state, action: PayloadAction<string>) {
+      delete state.deleting[action.payload]
       state.items = state.items.filter((r) => r.id !== action.payload)
+    },
+    untrackRepoFailure(state, action: PayloadAction<string>) {
+      delete state.deleting[action.payload]
     },
     updateRepoRequest(_, _action: PayloadAction<UpdateRepoPayload>) {},
     updateRepoSuccess(state, action: PayloadAction<TrackedRepo>) {

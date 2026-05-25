@@ -29,6 +29,7 @@ export function RepoCard({ repo }: { repo: TrackedRepo }) {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const syncing = useAppSelector((s) => s.repos.syncing[repo.id])
+  const deleting = useAppSelector((s) => s.repos.deleting[repo.id])
   const [menuOpen, setMenuOpen] = useState(false)
   const [editing, setEditing] = useState(false)
 
@@ -67,7 +68,11 @@ export function RepoCard({ repo }: { repo: TrackedRepo }) {
   return (
     <div
       onClick={handleCardClick}
-      className="group relative border border-neutral-800 rounded-lg p-5 transition-all hover:border-neutral-700 hover:bg-neutral-900/30 cursor-pointer"
+      className={`group relative border border-neutral-800 rounded-lg p-5 transition-all cursor-pointer ${
+        deleting
+          ? "opacity-50 pointer-events-none animate-pulse"
+          : "hover:border-neutral-700 hover:bg-neutral-900/30"
+      }`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">

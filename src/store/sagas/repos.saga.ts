@@ -36,6 +36,7 @@ function* untrackRepoSaga(action: PayloadAction<string>) {
     yield put(reposActions.untrackRepoSuccess(action.payload))
     toast.success("Repository removed")
   } catch (err: unknown) {
+    yield put(reposActions.untrackRepoFailure(action.payload))
     toast.error(extractError(err))
   }
 }

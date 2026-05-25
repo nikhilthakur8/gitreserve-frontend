@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Search, Plus, Loader2 } from "lucide-react"
+import { Search, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { RepoCard } from "./repo-card"
@@ -26,8 +26,34 @@ export function RepoList() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-5 w-5 animate-spin text-neutral-500" />
+      <div>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="h-6 w-36 rounded bg-neutral-800 animate-pulse" />
+            <div className="h-4 w-48 rounded bg-neutral-800/60 animate-pulse mt-2" />
+          </div>
+          <div className="h-9 w-36 rounded-md bg-neutral-800 animate-pulse" />
+        </div>
+        <div className="grid gap-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="border border-neutral-800 rounded-lg p-5 animate-pulse">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-5 w-5 rounded bg-neutral-800" />
+                  <div className="h-4 w-44 rounded bg-neutral-800" />
+                  <div className="h-3 w-3 rounded bg-neutral-800/60" />
+                </div>
+                <div className="h-5 w-16 rounded-full bg-neutral-800" />
+              </div>
+              <div className="mt-3 flex items-center gap-4">
+                <div className="h-3 w-24 rounded bg-neutral-800/60" />
+                <div className="h-3 w-16 rounded bg-neutral-800/60" />
+                <div className="h-3 w-20 rounded bg-neutral-800/60" />
+                <div className="h-3 w-14 rounded bg-neutral-800/60" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
