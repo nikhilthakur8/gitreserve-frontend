@@ -62,7 +62,7 @@ function* syncRepoSaga(action: PayloadAction<string>) {
       [api, "post"],
       `/repositories/${action.payload}/sync`,
     )
-    yield put(reposActions.syncRepoSuccess(data))
+    yield put(reposActions.syncRepoSuccess({ repoId: action.payload, repo: data }))
     toast.success("Sync triggered")
   } catch (err: unknown) {
     yield put(reposActions.syncRepoFailure(action.payload))

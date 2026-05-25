@@ -54,9 +54,9 @@ export const reposSlice = createSlice({
     syncRepoRequest(state, action: PayloadAction<string>) {
       state.syncing[action.payload] = true
     },
-    syncRepoSuccess(state, action: PayloadAction<TrackedRepo>) {
-      state.syncing[action.payload.id] = false
-      state.items = state.items.map((r) => (r.id === action.payload.id ? action.payload : r))
+    syncRepoSuccess(state, action: PayloadAction<{ repoId: string; repo: TrackedRepo }>) {
+      state.syncing[action.payload.repoId] = false
+      state.items = state.items.map((r) => (r.id === action.payload.repoId ? action.payload.repo : r))
     },
     syncRepoFailure(state, action: PayloadAction<string>) {
       state.syncing[action.payload] = false
