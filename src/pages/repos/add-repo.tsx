@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Loader2, Search, Lock, Globe, Webhook, Clock, X, Server, Check } from "lucide-react"
+import { Search, Lock, Globe, Webhook, Clock, X, Server, Check } from "lucide-react"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,7 +15,7 @@ export function AddRepoPage() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { items: available, loading } = useAppSelector((s) => s.availableRepos)
-  const integrations = useAppSelector((s) => s.integrations.items)
+  const { items: integrations, loading: integrationsLoading } = useAppSelector((s) => s.integrations)
   const [search, setSearch] = useState("")
   const [pendingRepo, setPendingRepo] = useState<AvailableRepo | null>(null)
 
@@ -93,7 +93,26 @@ export function AddRepoPage() {
             </p>
           </div>
 
-          {hasNoIntegrations ? (
+          {integrationsLoading ? (
+            <div className="animate-pulse space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="h-9 w-24 rounded-lg bg-neutral-800" />
+                <div className="h-9 w-24 rounded-lg bg-neutral-800" />
+              </div>
+              <div className="h-10 w-full rounded-md bg-neutral-800" />
+              <div className="rounded-lg border border-neutral-800 divide-y divide-neutral-800">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="px-4 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-3.5 w-3.5 rounded bg-neutral-800" />
+                      <div className="h-4 w-48 rounded bg-neutral-800" />
+                    </div>
+                    <div className="h-8 w-16 rounded-md bg-neutral-800" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : hasNoIntegrations ? (
             <div className="rounded-lg border border-neutral-800 bg-neutral-950 p-8 text-center">
               <p className="text-sm text-neutral-400 mb-4">
                 {gitIntegrations.length === 0
@@ -153,8 +172,16 @@ export function AddRepoPage() {
               </div>
 
               {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="h-5 w-5 animate-spin text-neutral-500" />
+                <div className="rounded-lg border border-neutral-800 divide-y divide-neutral-800 animate-pulse">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="px-4 py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-3.5 w-3.5 rounded bg-neutral-800" />
+                        <div className="h-4 rounded bg-neutral-800" style={{ width: `${120 + i * 20}px` }} />
+                      </div>
+                      <div className="h-8 w-16 rounded-md bg-neutral-800" />
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="rounded-lg border border-neutral-800 divide-y divide-neutral-800 max-h-[500px] overflow-auto">
