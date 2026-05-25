@@ -26,6 +26,7 @@ function* trackRepoSaga(action: PayloadAction<TrackRepoPayload>) {
     yield put(reposActions.trackRepoSuccess(data))
     toast.success("Repository tracked")
   } catch (err: unknown) {
+    yield put(reposActions.trackRepoFailure())
     toast.error(extractError(err))
   }
 }

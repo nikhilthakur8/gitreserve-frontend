@@ -52,6 +52,15 @@ export function AddRepoPage() {
     dispatch(availableReposActions.fetchAvailableRequest(type))
   }
 
+  const { items: trackedRepos } = useAppSelector((s) => s.repos)
+  const prevCount = useRef(trackedRepos.length)
+  useEffect(() => {
+    if (trackedRepos.length > prevCount.current) {
+      navigate("/dashboard")
+    }
+    prevCount.current = trackedRepos.length
+  }, [trackedRepos.length, navigate])
+
   const handleTrack = (syncMode: SyncMode) => {
     if (!pendingRepo || !activeStorage) return
 
@@ -70,7 +79,6 @@ export function AddRepoPage() {
       }),
     )
     setPendingRepo(null)
-    navigate("/dashboard")
   }
 
   const filtered = available.filter(

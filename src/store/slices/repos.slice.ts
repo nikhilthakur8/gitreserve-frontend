@@ -4,6 +4,7 @@ import type { TrackedRepo, TrackRepoPayload, UpdateRepoPayload } from "@/types/a
 interface ReposState {
   items: TrackedRepo[]
   loading: boolean
+  tracking: boolean
   error: string | null
   syncing: Record<string, boolean>
   deleting: Record<string, boolean>
@@ -12,6 +13,7 @@ interface ReposState {
 const initialState: ReposState = {
   items: [],
   loading: false,
+  tracking: false,
   error: null,
   syncing: {},
   deleting: {},
@@ -33,9 +35,15 @@ export const reposSlice = createSlice({
       state.loading = false
       state.error = action.payload
     },
-    trackRepoRequest(_, _action: PayloadAction<TrackRepoPayload>) {},
+    trackRepoRequest(state, _action: PayloadAction<TrackRepoPayload>) {
+      state.tracking = true
+    },
     trackRepoSuccess(state, action: PayloadAction<TrackedRepo>) {
+      state.tracking = false
       state.items.push(action.payload)
+    },
+    trackRepoFailure(state) {
+      state.tracking = false
     },
     untrackRepoRequest(state, action: PayloadAction<string>) {
       state.deleting[action.payload] = true
