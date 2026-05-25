@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react"
+import { useEffect, useRef, type FormEvent } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -9,9 +9,8 @@ import { useAppDispatch, useAppSelector } from "@/store"
 import { authActions } from "@/store/slices/auth.slice"
 
 export function LoginPage() {
-  const [submitting, setSubmitting] = useState(false)
   const dispatch = useAppDispatch()
-  const { isAuthenticated, error, loading } = useAppSelector((s) => s.auth)
+  const { isAuthenticated, error, submitting } = useAppSelector((s) => s.auth)
   const navigate = useNavigate()
   const lastError = useRef(error)
 
@@ -31,7 +30,6 @@ export function LoginPage() {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setSubmitting(true)
     const formData = new FormData(e.currentTarget)
     dispatch(authActions.loginRequest({
       email: formData.get("email") as string,
@@ -70,8 +68,8 @@ export function LoginPage() {
                 className="border-neutral-800 bg-neutral-900 text-white placeholder:text-neutral-500 focus-visible:ring-neutral-600"
               />
             </div>
-            <Button type="submit" className="w-full bg-white text-black hover:bg-neutral-200" disabled={submitting && loading}>
-              {submitting && loading ? "Signing in..." : "Sign in"}
+            <Button type="submit" className="w-full bg-white text-black hover:bg-neutral-200" disabled={submitting}>
+              {submitting ? "Signing in..." : "Sign in"}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-neutral-500">

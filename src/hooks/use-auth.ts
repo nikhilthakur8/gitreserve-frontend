@@ -4,7 +4,7 @@ import { authActions } from "@/store/slices/auth.slice"
 
 export function useAuth() {
   const dispatch = useAppDispatch()
-  const { user, loading, isAuthenticated, error } = useAppSelector((s) => s.auth)
+  const { user, initialLoading, submitting, isAuthenticated, error } = useAppSelector((s) => s.auth)
 
   useEffect(() => {
     dispatch(authActions.fetchMeRequest())
@@ -22,5 +22,5 @@ export function useAuth() {
     dispatch(authActions.logout())
   }
 
-  return { user, loading, isAuthenticated, error, login, signup, logout }
+  return { user, initialLoading, submitting, isAuthenticated, error, login, signup, logout }
 }

@@ -2,9 +2,9 @@ import { Navigate } from "react-router-dom"
 import { useAuth } from "@/hooks/use-auth"
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, initialLoading } = useAuth()
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-black">
         <div className="h-5 w-5 animate-spin rounded-full border-2 border-neutral-700 border-t-white" />
