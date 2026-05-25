@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { BookMarked, Plug, Activity, Settings, LogOut, PanelLeft } from "lucide-react"
+import { BookMarked, Plug, Activity, Settings, LogOut, PanelLeft, FileText } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useAppDispatch, useAppSelector } from "@/store"
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { label: "Integrations", icon: Plug, path: "/integrations" },
   { label: "Activity", icon: Activity, path: "/activity" },
   { label: "Settings", icon: Settings, path: "/settings" },
+  { label: "Docs", icon: FileText, path: "/docs" },
 ]
 
 export function Sidebar() {

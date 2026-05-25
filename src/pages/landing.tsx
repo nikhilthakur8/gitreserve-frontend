@@ -1,8 +1,143 @@
 import { useNavigate } from "react-router-dom"
-import { useCallback, useState } from "react"
-import { Shield, Zap, Server, ArrowRight, GitBranch } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { Shield, Zap, Server, ArrowRight, GitBranch, Check, Cloud, FileArchive, FileText, Hash } from "lucide-react"
 import { api } from "@/services/api"
 import { GithubIcon } from "@/components/icons/provider-icon"
+
+function HeroTerminal() {
+  const [phase, setPhase] = useState(0)
+  const [typedCmd, setTypedCmd] = useState("")
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const command = "git push origin main"
+
+  useEffect(() => {
+    let charIdx = 0
+
+    function typeNext() {
+      if (charIdx <= command.length) {
+        setTypedCmd(command.slice(0, charIdx))
+        charIdx++
+        timerRef.current = setTimeout(typeNext, 40 + Math.random() * 40)
+      } else {
+        timerRef.current = setTimeout(() => setPhase(1), 400)
+      }
+    }
+
+    typeNext()
+    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+  }, [])
+
+  useEffect(() => {
+    if (phase === 0) return
+    if (phase <= 7) {
+      const delays = [600, 400, 400, 700, 800, 700, 600, 600]
+      timerRef.current = setTimeout(() => setPhase(phase + 1), delays[phase - 1] ?? 500)
+      return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+    }
+    if (phase === 8) {
+      timerRef.current = setTimeout(() => {
+        setPhase(0)
+        setTypedCmd("")
+        let ci = 0
+        function retype() {
+          if (ci <= command.length) {
+            setTypedCmd(command.slice(0, ci))
+            ci++
+            timerRef.current = setTimeout(retype, 40 + Math.random() * 40)
+          } else {
+            timerRef.current = setTimeout(() => setPhase(1), 400)
+          }
+        }
+        timerRef.current = setTimeout(retype, 1200)
+      }, 3500)
+      return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+    }
+  }, [phase])
+
+  return (
+    <div className="w-[420px] rounded-xl border border-neutral-800 bg-neutral-950/90 shadow-2xl shadow-black/60 backdrop-blur-sm overflow-hidden">
+      {/* Title bar */}
+      <div className="flex items-center gap-1.5 border-b border-neutral-800/60 px-4 py-2.5">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+        <span className="ml-3 text-[10px] tracking-wide text-neutral-600 font-mono uppercase">Terminal</span>
+      </div>
+
+      {/* Terminal output */}
+      <div className="px-5 py-4 font-mono text-[13px] leading-[1.7] space-y-0.5 min-h-[130px]">
+        <div>
+          <span className="text-emerald-400">$</span>{" "}
+          <span className="text-white">{typedCmd}</span>
+          {phase === 0 && <span className="inline-block w-[7px] h-[15px] bg-emerald-400/80 ml-0.5 animate-pulse align-middle" />}
+        </div>
+        {phase >= 1 && <div className="text-neutral-500">Enumerating objects: 42, done.</div>}
+        {phase >= 2 && <div className="text-neutral-500">Compressing objects: 100% (38/38)</div>}
+        {phase >= 3 && <div className="text-neutral-500">Writing objects: 100% (42/42), 8.12 KiB</div>}
+        {phase >= 4 && (
+          <div className="flex items-center gap-1.5 text-emerald-400 pt-1">
+            <Check className="h-3.5 w-3.5" strokeWidth={3} />
+            <span>main → origin/main</span>
+          </div>
+        )}
+      </div>
+
+      {/* Backup section — always present, content fades in */}
+      <div className="border-t border-neutral-800/60">
+        <div className="flex items-center justify-between px-5 py-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              <Cloud className="h-3.5 w-3.5 text-emerald-400" />
+            </div>
+            <div>
+              <div className="text-[13px] font-medium text-white">GitReserve Backup</div>
+              <div className="text-[10px] text-neutral-500">S3-compatible storage</div>
+            </div>
+          </div>
+          <span className={`rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-[10px] font-medium text-emerald-400 transition-opacity duration-300 ${phase >= 8 ? "opacity-100" : "opacity-0"}`}>
+            Complete
+          </span>
+        </div>
+
+        <div className="px-5 pb-4 space-y-2.5 min-h-[120px]">
+          <div className={`text-[10px] font-medium uppercase tracking-widest text-neutral-600 transition-opacity duration-300 ${phase >= 5 ? "opacity-100" : "opacity-0"}`}>
+            Syncing
+          </div>
+          <div className={`flex items-center justify-between transition-opacity duration-300 ${phase >= 6 ? "opacity-100" : "opacity-0"}`}>
+            <div className="flex items-center gap-2.5">
+              <FileArchive className="h-3.5 w-3.5 text-neutral-500" />
+              <span className="text-[12px] text-neutral-300">repo-archive.bundle</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-neutral-600">8.12 KB</span>
+              <Check className="h-3 w-3 text-emerald-400" strokeWidth={3} />
+            </div>
+          </div>
+          <div className={`flex items-center justify-between transition-opacity duration-300 ${phase >= 7 ? "opacity-100" : "opacity-0"}`}>
+            <div className="flex items-center gap-2.5">
+              <FileText className="h-3.5 w-3.5 text-neutral-500" />
+              <span className="text-[12px] text-neutral-300">metadata.json</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-neutral-600">1.2 KB</span>
+              <Check className="h-3 w-3 text-emerald-400" strokeWidth={3} />
+            </div>
+          </div>
+          <div className={`flex items-center justify-between transition-opacity duration-300 ${phase >= 8 ? "opacity-100" : "opacity-0"}`}>
+            <div className="flex items-center gap-2.5">
+              <Hash className="h-3.5 w-3.5 text-neutral-500" />
+              <span className="text-[12px] text-neutral-300">checksums.sha256</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="h-3 w-3 text-emerald-400" strokeWidth={3} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function NavButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
   return (
@@ -54,8 +189,9 @@ export function LandingPage() {
 
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-6 py-5 md:px-12 lg:px-20">
-        <div className="flex items-center">
-          <span className="text-xl font-semibold tracking-tight">GitReserve</span>
+        <div className="flex items-center gap-8">
+          <span className="text-2xl font-bold tracking-tight">GitReserve</span>
+          <button onClick={() => navigate("/docs")} className="hidden sm:block text-sm text-neutral-400 hover:text-white transition-colors">Docs</button>
         </div>
         <NavButton onClick={() => void handleLogin()} loading={checking} />
       </nav>
@@ -69,50 +205,48 @@ export function LandingPage() {
           <div className="absolute top-0 left-3/4 h-full w-px bg-gradient-to-b from-transparent via-neutral-800/50 to-transparent" />
         </div>
 
-        <div className="relative max-w-4xl">
-          <div className="group mb-6 inline-flex items-center gap-2.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-5 py-2 text-xs font-medium text-emerald-400 backdrop-blur-sm transition-all duration-300 hover:border-emerald-500/40 hover:bg-emerald-500/10">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-            </span>
-            Automated backups on every push
+        <div className="relative flex flex-col gap-12 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
+          {/* Left — copy */}
+          <div className="max-w-2xl shrink-0">
+            <div className="group mb-8 inline-flex items-center gap-2.5 rounded-full border border-neutral-800 bg-neutral-900/50 px-4 py-1.5 text-[13px] font-medium text-neutral-300 backdrop-blur-sm transition-all duration-300 hover:border-neutral-700 hover:bg-neutral-900">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              </span>
+              Automated backups on every push
+            </div>
+
+            <h1 className="text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl lg:text-8xl">
+              Your repos.
+              <br />
+              <span className="text-neutral-500">Always safe.</span>
+            </h1>
+
+            <p className="mt-8 max-w-xl text-lg leading-relaxed text-neutral-400 md:text-xl">
+              GitReserve mirrors your Git repositories to S3-compatible storage automatically.
+              Every push triggers a backup. Zero manual intervention.
+            </p>
+
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <button
+                onClick={() => navigate("/signup")}
+                className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                Start for free
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </button>
+              <button
+                onClick={() => void handleLogin()}
+                className="inline-flex items-center gap-2 rounded-full border border-neutral-700 px-7 py-3 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:text-white"
+              >
+                Sign in
+              </button>
+            </div>
           </div>
 
-          <h1 className="text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl lg:text-8xl">
-            Your repos.
-            <br />
-            <span className="text-neutral-500">Always safe.</span>
-          </h1>
-
-          <p className="mt-8 max-w-xl text-lg leading-relaxed text-neutral-400 md:text-xl">
-            GitReserve mirrors your Git repositories to S3-compatible storage automatically.
-            Every push triggers a backup. Zero manual intervention.
-          </p>
-
-          <div className="mt-10 flex flex-wrap items-center gap-4">
-            <button
-              onClick={() => navigate("/signup")}
-              className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3 text-sm font-semibold text-black transition-all duration-200 hover:scale-105 active:scale-95"
-            >
-              Start for free
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </button>
-            <button
-              onClick={() => void handleLogin()}
-              className="inline-flex items-center gap-2 rounded-full border border-neutral-700 px-7 py-3 text-sm font-medium text-neutral-300 transition-all duration-200 hover:border-neutral-500 hover:text-white"
-            >
-              Sign in
-            </button>
-          </div>
-        </div>
-
-        {/* Decorative element */}
-        <div className="absolute -right-20 top-1/2 -translate-y-1/2 hidden lg:block">
-          <div className="relative h-80 w-80">
-            <div className="absolute inset-0 rounded-full border border-neutral-800/60" />
-            <div className="absolute inset-8 rounded-full border border-neutral-800/40" />
-            <div className="absolute inset-16 rounded-full border border-neutral-800/30" />
-            <div className="absolute inset-24 rounded-full border border-neutral-800/20 bg-neutral-900/20" />
+          {/* Right — terminal animation */}
+          <div className="hidden lg:block lg:shrink-0">
+            <HeroTerminal />
           </div>
         </div>
       </section>
@@ -209,8 +343,9 @@ export function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-neutral-800 px-6 py-8 md:px-12 lg:px-20">
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center">
+          <div className="flex items-center gap-6">
             <span className="text-sm font-medium">GitReserve</span>
+            <button onClick={() => navigate("/docs")} className="text-xs text-neutral-500 hover:text-white transition-colors">Docs</button>
           </div>
           <p className="text-xs text-neutral-600">
             &copy; {new Date().getFullYear()} GitReserve. All rights reserved.

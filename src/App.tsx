@@ -12,6 +12,8 @@ import { SettingsPage } from "@/pages/settings"
 import { AddRepoPage } from "@/pages/repos/add-repo"
 import { RepoDetailPage } from "@/pages/repos/repo-detail"
 import { OAuthCallbackPage } from "@/pages/integrations/oauth-callback"
+import { AuthOAuthCallbackPage } from "@/pages/auth/oauth-callback"
+import { DocsPage } from "@/pages/docs"
 import { ProtectedRoute } from "@/layouts/protected-route"
 
 export default function App() {
@@ -22,6 +24,9 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/auth/oauth/callback" element={<AuthOAuthCallbackPage />} />
+          <Route path="/docs" element={<DocsPage />} />
+          <Route path="/docs/:slug" element={<DocsPage />} />
           <Route
             path="/dashboard"
             element={
