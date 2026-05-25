@@ -42,6 +42,7 @@ export function GitProviderCard({ type, integration }: Props) {
       toast.success(`${label} connection is healthy`)
     } catch {
       toast.error(`${label} connection test failed`)
+      dispatch(integrationsActions.fetchIntegrationsRequest())
     } finally {
       setVerifying(false)
     }
